@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+	nav {
+		background-color: #333;
+		overflow: hidden;
+	}
+
+	nav a {
+		float: left;
+		display: block;
+		color: white;
+		text-align: center;
+		padding: 14px 20px;
+		text-decoration: none;
+	}
+
+	nav a:hover {
+		background-color: #ddd;
+		color: black;
+	}
+</style>
+	<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+	<script>
+	    function previewImagemsg(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const preview = document.getElementById('imagePreviewmsg');
+
+            if (file) {
+                reader.onload = function(e) {
+                    preview.src = e.target.result; // Set the image source to the loaded data
+                };
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        }
+		function previewImageencrypt(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const preview = document.getElementById('imagePreviewencrypt');
+
+            if (file) {
+                reader.onload = function(e) {
+                    preview.src = e.target.result; // Set the image source to the loaded data
+                };
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        }
+		function previewImage2(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const preview = document.getElementById('imagePreview2');
+
+            if (file) {
+                reader.onload = function(e) {
+                    preview.src = e.target.result; // Set the image source to the loaded data
+                };
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        }
+</script>
+</head>
+<body style="background-color:#ADD8E6;">
+
+	<nav>
+        <a href="http://127.0.0.1:5000">Home</a> <!-- Link to first HTML page -->
+        <a href="http://127.0.0.1:5000/image2image">Image/image</a> <!-- Link to second HTML page -->
+    </nav>
+	
+	<h2>Encryption </h2>
+	<h4>Image-to-image encryption is a methods that hide or encode image in another image to produce a new transformed image.  
+		By transforming an image into another (scrambled or altered) image, encryption protects visual data while still allowing it to be recovered or verified.
+		Image-to-Image Encryption is an important technique used in fields like digital security, privacy and authentication.</h4>
+<form action="/image2image" method="post" enctype="multipart/form-data" style="background-color:#f0f0f0;">
+	<label for="imageFile">Choose an image:</label>
+    <input type="file" name="file1" id="imageFile" accept="image/png, image/jpeg" onchange="previewImagemsg(event)">
+	{% if org_image1 %}
+	<img id="imagePreviewmsg" src="{{ url_for('uploaded_file', filename=org_image1) }}" class="image-preview" alt="Image Preview">
+	{% else %}
+	 <img id="imagePreviewmsg" class="image-preview" alt="Image Preview">
+	{% endif %}
+	<br><br>
+	
+	<label for="key">Enter the key:</label>
+	<input id="key" placeholder="Enter your secret key" name="key" rows="4" cols="50"  required value={{ikey}}>
+	<br><br>
+	
+	<label for="imageFile">Upload an image:</label>
+    <input type="file" name="file2" id="imageFile" accept="image/png, image/jpeg" onchange="previewImageencrypt(event)">	
+	{% if org_image2 %}
+	<img id="imagePreviewencrypt" src="{{ url_for('uploaded_file', filename=org_image2) }}" class="image-preview" alt="Image Preview">
+	{% else %}
+	 <img id="imagePreviewencrypt" class="image-preview" alt="Image Preview">
+	{% endif %}
+	<br><br>
+	<input type="submit" value="Submit"> <br><br>
+</form>
+
+{{success}}
+   {% if processed_image %}
+        <h2>Processed Image:</h2>
+        <img src="{{ url_for('uploaded_file', filename=processed_image) }}" alt="Processed Image" style="max-width: 500px;"> <br><br>
+		<a href="{{ url_for('uploaded_file', filename= processed_image.split('/')[-1]) }}" class="button" download>Download Processed Image</a>
+    {% endif %}
+	<br><br>
+	
+	
+	<h2>Decryption </h2><br><br>
+<form action="/decrypt_img" method="post" enctype="multipart/form-data" style="background-color:#f0f0f0;">	
+	<label for="imageFile">Upload an image:</label>
+    <input type="file" name="decryptfile" id="imageFile" accept="image/png, image/jpeg" required onchange="previewImage2(event)">
+	{% if org_image %}
+	<img id="imagePreview2" src="{{ url_for('uploaded_file', filename=dec_image) }}" class="image-preview" alt="Image Preview">
+	{% else %}
+    <img id="imagePreview2" class="image-preview" alt="Image Preview">
+	{% endif %}
+	<br><br>
+	
+	<label for="key">Enter the key:</label>
+	<input id="key" placeholder="Enter your secret key" name="decryptkey" rows="4" cols="50" required value={{dkey}}>
+	<br><br>
+	
+	<input type="submit" value="Decrypt"> <br><br>
+	
+	{% if decrypted_image_url %}
+        <h4>Decrypted image:</h4>
+		 <img src="{{ url_for('uploaded_file', filename=decrypted_image_url) }}" alt="Decrypted Image" style="max-width: 500px;"> <br><br>
+		 <a href="{{ url_for('uploaded_file', filename= decrypted_image_url.split('/')[-1]) }}" class="button" download>Download Image</a>
+    {% endif %}
+	
+</form>	
+
+
+</body>
+</html>	

@@ -1,0 +1,135 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 0;
+    background-color: #85C1AE;
+    color: #333;
+}
+
+h1, h2, h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 18px;
+}
+
+form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.mysection{
+	width:40%;
+	float:right;
+}
+
+.section2{
+	width:40%;
+	float:right;
+}
+
+nav {
+    background-color: #333;
+    overflow: hidden;
+}
+
+nav a {
+    float: left;
+    display: block;
+	color: white;
+    text-align: center;
+	padding: 14px 20px;
+	text-decoration: none;
+}
+
+nav a:hover {
+	background-color: #ddd;
+	color: black;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
+
+textarea input[type="text"], input[type="file"], select {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+
+input[type="file"] {
+    margin-top: 10px;
+}
+
+.image-preview {
+    margin-top: 10px;
+    max-width: 100%;
+    max-height: 300px;
+    display: block;
+}
+
+input[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+	margin-top: 15px;
+}
+
+input[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #27ae60;
+    color: white;
+}
+
+button:hover {
+    background-color: #219150;
+}
+
+.select-container {
+    margin-top: 10px;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.success-message {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-weight: bold;
+}

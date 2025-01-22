@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+	nav {
+		background-color: #333;
+		overflow: hidden;
+	}
+
+	nav a {
+		float: left;
+		display: block;
+		color: white;
+		text-align: center;
+		padding: 14px 20px;
+		text-decoration: none;
+	}
+
+	nav a:hover {
+		background-color: #ddd;
+		color: black;
+	}
+</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Web</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script>
+	    document.getElementById('textFile').addEventListener('change', readFile);
+
+        function readFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            if (file) {
+                if (file.name.endsWith('.txt')) {
+                    reader.onload = function(e) {
+                        const content = e.target.result;
+                        document.getElementById('message').value = content; // Set the content to the message textarea
+                    };
+                    reader.readAsText(file);
+                } else if (file.name.endsWith('.docx')) {
+                    reader.onload = function(e) {
+                        const arrayBuffer = e.target.result;
+						mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                            .then(function(result) {
+                                document.getElementById('message').value = result.value; // Set the content to the message textarea
+                            })
+                            .catch(function(err) {
+                                console.error(err);
+                            });
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    alert('Please upload a valid .txt or .docx file.');
+                }
+            }
+        }
+
+		function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const preview = document.getElementById('imagePreview');
+
+            if (file) {
+                reader.onload = function(e) {
+                    preview.src = e.target.result; // Set the image source to the loaded data
+                };
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        }
+		
+		function previewImage2(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const preview = document.getElementById('imagePreview2');
+
+            if (file) {
+                reader.onload = function(e) {
+                    preview.src = e.target.result; // Set the image source to the loaded data
+                };
+                reader.readAsDataURL(file); // Read the image file as a data URL
+            }
+        }
+		const msg = `{{ msg }}`; // Use server-side variable in JavaScript
+
+        document.getElementById('downloadTxt').addEventListener('click', function() {
+            const blob = new Blob([msg], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypt_message.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+		document.getElementById('downloadDocx').addEventListener('click', function() {
+            const blob = new Blob([msg], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'decrypt_message.docx';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+		    function downloadFile(message) {
+        const msg = "Decrypted Message: {{message}}"; // Replace with actual decrypted message
+        const fileType = document.getElementById('file-type').value;
+        
+        let fileContent = msg;
+        let fileName = "decrypted_message";
+        let fileExtension = ".txt";
+        
+        if (fileType === 'docx') {
+            const docxContent = generateDocxContent(msg); // Generate DOCX content
+            fileContent = docxContent;
+            fileExtension = ".docx";
+        }
+
+        // Create a Blob with the appropriate MIME type
+        const blob = new Blob([fileContent], { type: fileType === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName + fileExtension;
+
+        link.click();
+    }
+
+    // Function to generate a proper DOCX file content (using the DOCX structure)
+    function generateDocxContent(text) {
+        const zip = new JSZip();
+        
+        // Add the content file (word/document.xml)
+        const docxXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+            <w:body>
+                <w:p>
+                    <w:r>
+                        <w:t>${text}</w:t>
+                    </w:r>
+                </w:p>
+            </w:body>
+        </w:document>`;
+
+        zip.file('word/document.xml', docxXml);
+        
+        // Add the [Content_Types].xml file (this is needed for a valid DOCX)
+        zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8"?>
+        <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+            <Default Extension="xml" ContentType="application/xml"/>
+            <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+            <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+        </Types>`);
+
+        // Add the relationships file (word/_rels/document.xml.rels)
+        zip.file('word/_rels/document.xml.rels', `<?xml version="1.0" encoding="UTF-8"?>
+        <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+            <Relationship Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
+                Target="document.xml"/>
+        </Relationships>`);
+
+        // Generate the DOCX file (a ZIP file)
+        return zip.generateAsync({ type: 'blob' });
+    }
+
+</script>	
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
+</head>
+<body style="background-color:#98FB98;">
+	<nav>
+        <a href="http://127.0.0.1:5000">Home</a> <!-- Link to first HTML page -->
+        <a href="http://127.0.0.1:5000/image2image">Image/image</a> <!-- Link to second HTML page -->
+    </nav>
+	
+	<h2>Encryption </h2> 
+	<h4>Message to Image Encryption is a form of steganography which involves embedding a secret message (such as text) inside an image file in a way that the image remains visually unchanged to the human eye but contains hidden data. 
+	The message is hidden in the image by manipulating the pixel values or certain attributes of the image in a way that it is not noticeable when the image is viewed normally.</h4>
+
+<form action="/" method="post" enctype="multipart/form-data" style="background-color:#F0FFF0;">
+	<label for="message">Message:</label>
+    <textarea id="message" name="message" placeholder="Enter your message here" rows="10"  required>{{imsg}}</textarea><br><br>
+	
+	<label for="textFile">Upload text file:</label>
+    <input type="file" name="textFile" id="textFile" accept=".txt,.docx" onchange="readFile(event)"><br><br>
+	
+	<label for="key">Enter the key:</label>
+	<input id="key" placeholder="Enter your secret key" name="key" rows="4" cols="50"  required value={{ikey}}>
+	<br><br>
+	
+	<label for="imageFile">Choose an image:</label>
+    <input type="file" name="file" id="imageFile" accept="image/png, image/jpeg" required onchange="previewImage(event)">
+	 
+   
+	{% if org_image %}
+	<img id="imagePreview" src="{{ url_for('uploaded_file', filename=org_image) }}" class="image-preview" alt="Image Preview">
+	{% else %}
+	 <img id="imagePreview" class="image-preview" alt="Image Preview">
+	
+	{% endif %}
+	<br><br>
+	<input type="submit" value="Submit"> <br><br>
+</form>	
+
+{{success}}
+   {% if processed_image %}
+        <h2>Processed Image:</h2>
+        <img src="{{ url_for('uploaded_file', filename=processed_image) }}" alt="Processed Image" style="max-width: 500px;"> <br><br>
+		<a href="{{ url_for('uploaded_file', filename= processed_image.split('/')[-1]) }}" class="button" download>Download Processed Image</a>
+    {% endif %}
+	<br><br>
+	
+	
+	<h2>Decryption </h2><br><br>
+<form action="/decrypt" method="post" enctype="multipart/form-data" style="background-color:#F0FFF0;">
+	<label for="imageFile">Upload an image:</label>
+    <input type="file" name="decryptfile" id="imageFile" accept="image/png, image/jpeg" required onchange="previewImage2(event)">
+	{% if org_image %}
+	<img id="imagePreview2" src="{{ url_for('uploaded_file', filename=dec_image) }}" class="image-preview" alt="Image Preview">
+	{% else %}
+    <img id="imagePreview2" class="image-preview" alt="Image Preview">
+	{% endif %}
+	<br><br>
+	
+	<label for="key">Enter the key:</label>
+	<input id="key" placeholder="Enter your secret key" name="decryptkey" rows="4" cols="50" required value={{dkey}}>
+	<br><br>
+	
+	<input type="submit" value="Decrypt"> <br><br>
+	
+	<h4>Decrypted Message: {{msg}}</h4><br><br>
+</form>	
+</body>
+</html>
